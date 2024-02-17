@@ -1,5 +1,6 @@
 # succes for saving file in memory
 # succes for checking file if landscape or not
+# close image
 
 from PyPDF2 import PdfWriter, PdfReader
 from PIL import Image
@@ -9,7 +10,7 @@ import os
 from tkinter import Tk, filedialog
 
 # Resize and Compress for 1 Image 
-def resize_and_compress_image(image_path, target_size=(620, 877), quality=85):
+def resize_and_compress_image(image_path, target_size=(620, 877), quality=50):
     img = Image.open(image_path)
 
     # Check if the image has an alpha channel (transparency)
@@ -24,7 +25,8 @@ def resize_and_compress_image(image_path, target_size=(620, 877), quality=85):
 
     # Save the resized and compressed image to BytesIO
     output_buffer = BytesIO()
-    img.save(output_buffer, format="JPEG", quality=quality, optimize=True)
+    img.save(fp=output_buffer, format="JPEG", quality=quality, optimize=True)
+    img.close()
     
     return output_buffer
 
@@ -37,11 +39,12 @@ def convert_image_to_pdf(image_buffer):
     c.setPageSize((img.width, img.height))
     c.drawInlineImage(img, 0, 0, width=img.width, height=img.height)
     c.save()
-
+    img.close()
+    
     return pdf_buffer
 
 # Resize and Compress Image consuming resize_and_compress_image function
-def resize_and_compress_images(image_paths, target_size=(620, 877), quality=85):
+def resize_and_compress_images(image_paths, target_size=(620, 877), quality=50):
     converted_pdfs = []
 
     for image_path in image_paths:
@@ -63,6 +66,8 @@ def merge_pdfs(output_path, *pdf_buffers):
 
     with open(output_path, 'wb') as output_pdf_file:
         pdf_writer.write(output_pdf_file)
+
+    pdf_writer.close()
 
 # local files input
 def browse_files():
